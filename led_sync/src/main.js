@@ -4,7 +4,8 @@
   const bufferSize = 1024;
   let Audio = require('./audio');
   let a = new Audio(bufferSize);
-
+  let socketio = require('socket.io-client');
+  var io = socketio('192.168.0.113:3000');
 
   var aspectRatio = 16 / 10;
   var scene = new THREE.Scene();
@@ -64,6 +65,7 @@
   // Variables we update
   let loudnessLines = new THREE.Group();
   scene.add(loudnessLines);
+  var r = 0,g = 0,b = 0,w = 0;
 
   let features = null;
 
@@ -74,24 +76,18 @@
     if (features) {
         // Render loudness
         if (features.loudness && features.loudness.specific) {
-        var r = 0;
-        var g = 0;
-        var b = 0;
-        //var a = 0;
+        r = features.loudness.specific[0];
+        g = features.loudness.specific[1];
+        b = features.loudness.specific[2];
+        w = features.loudness.specific[3];
+
+        var message = r + "," + g + "," + b + "," + w;
+        document.getElementById("loud").innerHTML = message;
+        if(message != "0,0,0,0")
+          io.emit('rgbw', message);
     
-        document.getElementById("loud").innerHTML = "there are " + String(features.loudness.specific.length) + "features" + String(features.loudness.specific[0]);
-
-        //if(features.loudness.specific[0] > 1){
-        //    rpio.write(32, rpio.HIGH);
-        //}
-        //if(features.loudness.specific[4] > 1){
-        //    rpio.write(36, rpio.HIGH);
-        //}
-        //if(features.loudness.specific[8] > 1){
-        //    rpio.write(38, rpio.HIGH);
-        //}
-
-
+       //document.getElementById("loud").innerHTML = "there are " + String(features.loudness.specific.length) + "features" + String(features.loudness.specific[0]);
+        
         for (var i = 0; i < features.loudness.specific.length; i++) {
           let geometry = new THREE.Geometry();
           geometry.vertices.push(new THREE.Vector3(
@@ -117,6 +113,15 @@
     requestAnimationFrame(render);
     renderer.render(scene, camera);
   }
+  io.on('connect', function (data) {
+      var message = r + "," + g + "," + b + "," + w;
+      document.getElementById("loud").innerHTML = message;
+      io.emit('rgbw', message);
+    });
 
   render();
+
+  
+
 })();
+
