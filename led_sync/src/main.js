@@ -76,18 +76,19 @@
     if (features) {
         // Render loudness
         if (features.loudness && features.loudness.specific) {
-        r = features.loudness.specific[0];
-        g = features.loudness.specific[1];
-        b = features.loudness.specific[2];
-        w = features.loudness.specific[3];
+        r = (features.loudness.specific[2]/2.5 - 0.25).clamp(0,1);
+        g = (features.loudness.specific[8]/1.5 - 0.25).clamp(0,1);
+        b = (features.loudness.specific[16]/3 - 0.25).clamp(0,1);
+        w = (features.loudness.specific[20]/2 - 0.25).clamp(0,1);
 
-        var message = r + "," + g + "," + b + "," + w;
+        var message = r +  g + b + w;
         document.getElementById("loud").innerHTML = message;
-        if(message != "0,0,0,0")
-          io.emit('rgbw', message);
-    
-       //document.getElementById("loud").innerHTML = "there are " + String(features.loudness.specific.length) + "features" + String(features.loudness.specific[0]);
-        
+        if(message != 0)
+        {
+            var intensity = ((r * 2 + b + g + w)/8).clamp(0,1);;
+            io.emit('rainbow', {intensity: intensity});
+        }
+  
         for (var i = 0; i < features.loudness.specific.length; i++) {
           let geometry = new THREE.Geometry();
           geometry.vertices.push(new THREE.Vector3(
@@ -116,11 +117,26 @@
   io.on('connect', function (data) {
       var message = r + "," + g + "," + b + "," + w;
       document.getElementById("loud").innerHTML = message;
-      io.emit('rgbw', message);
+      //io.emit('rgbw', {r: r, g: g, b: b, w: w});
+
     });
 
   render();
 
+/**
+ * Returns a number whose value is limited to the given range.
+ *
+ * Example: limit the output of this computation to between 0 and 255
+ * (x * 255).clamp(0, 255)
+ *
+ * @param {Number} min The lower boundary of the output range
+ * @param {Number} max The upper boundary of the output range
+ * @returns A number in the range [min, max]
+ * @type Number
+ */
+Number.prototype.clamp = function(min, max) {
+  return Math.min(Math.max(this, min), max);
+};
   
 
 })();
