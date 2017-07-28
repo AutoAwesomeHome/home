@@ -3,9 +3,8 @@
 
   const bufferSize = 1024;
   let Audio = require('./audio');
-  var piblaster = require('pi-blaster.js');
   let a = new Audio(bufferSize);
-piblaster.setPwm(21, 1 )
+
 
   var aspectRatio = 16 / 10;
   var scene = new THREE.Scene();
