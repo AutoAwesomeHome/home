@@ -4,7 +4,8 @@
   "description": "controlls the leds for the raspberry pi",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "serve": "node index"
   },
   "author": "R.M. Rooimans",
   "license": "ISC",

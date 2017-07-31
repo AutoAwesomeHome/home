@@ -6,7 +6,7 @@ var piblaster = require('pi-blaster.js');
 
 // name GPIO pins to their corresponding led color
 var red = 22, // Check
-	  gre = 27, //check
+	  gre = 27, // Check
 	  blu = 18,	// Check
 	  whi = 25
 
@@ -122,30 +122,48 @@ const rainbowLoop = async () => {
 const snooze = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 
-function Set(r,g,b){
+function Set(r, g, b, w){
+	console.log(r + g + b);
     piblaster.setPwm(red, r); 
     piblaster.setPwm(gre, g); 
     piblaster.setPwm(blu, b); 
-
-    console.log(
-            "r:" + r + "\n" +
-            "g:" + g + "\n" +
-            "b:" + b + "\n");
-}
-
-function Set(r,g,b,w){
-    piblaster.setPwm(red, r); 
-    piblaster.setPwm(gre, g); 
-    piblaster.setPwm(blu, b); 
-    piblaster.setPwm(whi, w); 
-
-    console.log(
-            "r:" + r + "\n" +
-            "g:" + g + "\n" +
-            "b:" + b + "\n" +
-            "w:" + w + "\n");
+    if (arguments.length === 4) {
+    	piblaster.setPwm(whi, w); 
+  	}
 }
 
 http.listen(3000, function(){
   console.log('listening on *:3000');
 });
+
+
+
+/* accepts parameters
+ * h  Object = {h:x, s:y, v:z}
+ * OR 
+ * h, s, v
+*/
+function HSVtoRGB(h, s, v) {
+    var r, g, b, i, f, p, q, t;
+    if (arguments.length === 1) {
+        s = h.s, v = h.v, h = h.h;
+    }
+    i = Math.floor(h * 6);
+    f = h * 6 - i;
+    p = v * (1 - s);
+    q = v * (1 - f * s);
+    t = v * (1 - (1 - f) * s);
+    switch (i % 6) {
+        case 0: r = v, g = t, b = p; break;
+        case 1: r = q, g = v, b = p; break;
+        case 2: r = p, g = v, b = t; break;
+        case 3: r = p, g = q, b = v; break;
+        case 4: r = t, g = p, b = v; break;
+        case 5: r = v, g = p, b = q; break;
+    }
+    return {
+        r: r,
+        g: g,
+        b: b
+    };
+}
