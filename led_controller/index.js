@@ -6,9 +6,11 @@ var piblaster = require('pi-blaster.js');
 
 // name GPIO pins to their corresponding led color
 var red = 22, // Check
-	  gre = 27, // Check
-	  blu = 18,	// Check
-	  whi = 25
+    gre = 27, // Check
+    blu = 18,   // Check
+    whi = 25
+
+var _r = 0, _g = 0, _b = 0, _w = 0;
 
  var intensity = 1;
  var fade_speed = 10;
@@ -44,6 +46,10 @@ io.on('connection', function(socket){
         fading = true;
         rainbowLoop();
       }
+  });
+
+  socket.on('stop', function(msg){
+    fadeOut();
   });
 });
 
@@ -84,52 +90,69 @@ const fadeLoop = async () => {
 }
 
 const rainbowLoop = async () => {
-  while(fading){
-    var rc = 0, bc = 100, gc = 0;
-    // fade from blue to violet
-    for (; rc < 101; rc++) { 
-      Set(rc * intensity / 100, bc * intensity / 100, gc * intensity / 100); 
-      await snooze(fade_speed);
-    } 
-    // fade from violet to red
-    for (; bc > 0; bc--) { 
-      Set(rc * intensity / 100, bc * intensity / 100, gc * intensity / 100);    
-      await snooze(fade_speed);
-    } 
-    // fade from red to yellow
-    for (; gc < 101; gc++) { 
-      Set(rc * intensity / 100, bc * intensity / 100, gc * intensity / 100);  
-      await snooze(fade_speed);
-    } 
-    // fade from yellow to gcreen
-    for (; rc > 0; rc--) { 
-      Set(rc * intensity / 100, bc * intensity / 100, gc * intensity / 100);   
-      await snooze(fade_speed);;
-    } 
-    // fade from gcreen to teal
-    for (; bc < 101; bc++) { 
-      Set(rc * intensity / 100, bc * intensity / 100, gc * intensity / 100);   
-      await snooze(fade_speed);
-    } 
-    // fade from teal to blue
-    for (; gc > 0; gc--) { 
-      Set(rc * intensity / 100, bc * intensity / 100, gc * intensity / 100);   
-      await snooze(fade_speed);
-    } 
-  }
+    while(fading){
+        var rc = 0, bc = 100, gc = 0;
+        // fade from blue to violet
+        for (; rc < 101; rc++) {
+            _r = rc; 
+            Set(); 
+            await snooze(fade_speed);
+        } 
+        // fade from violet to red
+        for (; bc > 0; bc--) { 
+            _b = bc;
+            Set();    
+            await snooze(fade_speed);
+        } 
+        // fade from red to yellow
+        for (; gc < 101; gc++) { 
+            _g = gc;
+            Set();  
+            await snooze(fade_speed);
+        } 
+        // fade from yellow to gcreen
+        for (; rc > 0; rc--) { 
+            _r = rc;
+            Set(); 
+            await snooze(fade_speed);
+        } 
+        // fade from gcreen to teal
+        for (; bc < 101; bc++) { 
+            _b = bc;
+            Set();    
+            await snooze(fade_speed);
+        } 
+        // fade from teal to blue
+        for (; gc > 0; gc--) { 
+            _g = gc;
+            Set();  
+            await snooze(fade_speed);
+        } 
+    }
+}
+
+const fadeOut = async () => {
+    fading = false;
+    while(intensity > 0)
+    {
+        intensity -= 0.005;
+        if(intensity < 0)
+            intensity = 0;
+        Set(); 
+        await snooze(fade_speed * 5);
+    }
+
 }
 
 const snooze = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 
-function Set(r, g, b, w){
-	console.log(r + g + b);
-    piblaster.setPwm(red, r); 
-    piblaster.setPwm(gre, g); 
-    piblaster.setPwm(blu, b); 
-    if (arguments.length === 4) {
-    	piblaster.setPwm(whi, w); 
-  	}
+function Set(){
+    console.log(" r:" + _r + " g:"+ _g  + " b:"+ _b  + " I:"+ intensity);
+    piblaster.setPwm(red, _r * intensity / 100); 
+    piblaster.setPwm(gre, _g * intensity / 100);  
+    piblaster.setPwm(blu, _b * intensity / 100);  
+    piblaster.setPwm(whi, _w * intensity / 100);  
 }
 
 http.listen(3000, function(){
